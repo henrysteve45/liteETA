@@ -13,23 +13,47 @@
             html {
                 overflow: visible;
             }
+            p {
+                font-size: 14px;
+                line-height: 24px;
+                padding-left: 32px;
+                color: rgba(255, 255, 255, 0.5);
+            }
+            h3 {
+                padding-left: 32px;
+            }
+            a {
+                color: #75b5ff;
+            }
+            h1 {
+                border-bottom: 5px solid #1C6EA4;
+                border-image-source: linear-gradient(to right, #5788c1, rgba(0, 0, 0, 0));
+                border-image-slice: 1;
+                padding-bottom: 8px;
+                width: 25%;
+            }
             .about-image {
-          background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.75)), url("aboutbg.png");
-          height: 256px;
-          background-position: center;
-          background-repeat: no-repeat;
-          background-size: cover;
-          position: relative;
-        }
-
-        .about-text {
-          text-align: center;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          color: white;
-        }
+                background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.75)), url("aboutbg.jpg");
+                height: 256px;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-size: cover;
+                position: relative;
+            }
+            .about-text {
+                text-align: center;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: white;
+            }
+            /*responsive*/
+            @media screen and (max-width: 728px) {
+                .about-image {
+                    height: 128px;
+                }
+            }
         </style>
         <script>
         //responsive hamburger toggle
@@ -54,19 +78,22 @@
         </nav>
         <div class="about-image">
           <div class="about-text">
-            <h1 style="font-size:50px">About</h1>
+            <h1 style="font-size:50px; border: none;">About</h1>
           </div>
         </div>
-        <div class="about" style="color: white; background-color: #2c2c33; padding: 16px;">
-            <h1>General WIP</h1>
+        <div class="about" style="color: white; background-color: #2c2c33; padding:5%; padding-top: 10px;">
+            <h1>General</h1>
                 <h3>What is this?</h3>
                     <p>This is a Real-Time Bus ETA web application. It displays information about Washington, DC Metrobus routes and schedules in a clean, accessible format.</p>
                 <h3>Who made this?</h3>
+                    <p>My name is Steve Henry, and I am a student from Marymount University studying Cybersecurity. I am passionate about frontend web development and information security. I made this application to demonstrate my skills in both fields and creating something useful to me, my family, and my friends.</p>
                 <h3>Why make this? Isn't there already an official bus ETA site?</h3>
+                    <p>The official WMATA BusETA site exists <a id="intext" href="https”//www.buseta.wmata.com/" target="_blank" rel="noopener noreferrer">here</a>. I made this site to improve on some of the shortcomings my friends and I experience on the official product. First, we find the user interface difficult to read. When we select a stop, we are overloaded with unnecessary and inconvenient information. This includes but is not limited to: bus numbers, times not displayed in chronological order, a timer ticking, and schedule data mixed with live data. Often times we will have to argue if the bus will really come, is it schedule data, why is the data jumping, and more. To add to this, the page is not responsive. There is a mobile version, but it is separate from the main page (buseta.wmata.com vs buseta.wmata.com/m/).</p><p>I sought to fix these problems by creating my own version of the web application. My goal was to demonstrate my programming skills and create something useful to me and my family.</p>
             <h1>Credits</h1>
-                <p>Bus time information from the <a href="https://developer.wmata.com/">Washington Metropolitan Area Transit Authority (WMATA)</a>. I used their developer API to pull bus data including time, stop, and location information.</p>
-                <p>Map is powered by <a href="https://leafletjs.com/">Leaflet</a> and <a href="https://docs.mapbox.com/api/overview/">Mapbox</a>. Leaflet is an open-source JavaScript library for generating interactive maps. It provides methods for creating markers, pins, polygons, and other modules needed for online maps. Mapbox provides map imagery for the maps.</p>
-                <p>Navigation bar icons are from <a href="https://fontawesome.com/icons?d=gallery">Font Awesome</a>.</p>
+                <p>Bus time information from the <a href="https://developer.wmata.com/" target="_blank" rel="noopener noreferrer">Washington Metropolitan Area Transit Authority (WMATA)</a>. I used their developer API to pull bus data including time, stop, and location information.</p>
+                <p>Map is powered by <a href="https://leafletjs.com/" target="_blank" rel="noopener noreferrer">Leaflet</a> and <a href="https://docs.mapbox.com/api/overview/" target="_blank" rel="noopener noreferrer">Mapbox</a>. Leaflet.js is a JavaScript library for user-friendly maps. There are many methods they have for generating maps and details such as markers, lines, polygons, routes, and more. Mapbox provides map imagery for the maps.</p>
+                <p>Navigation bar icons are from <a href="https://fontawesome.com/icons?d=gallery" target="_blank" rel="noopener noreferrer">Font Awesome</a>.</p>
+                <p>&copy; 2021 - Steve Henry</p>
         </div>
         </div>
     </body>

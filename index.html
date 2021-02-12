@@ -56,7 +56,8 @@
     //load keys from config file
     var wmataKey = config.WMATA_KEY;
     var mapboxKey = config.MAPBOX_KEY;
-    console.log(wmataKey)
+    var favIDs = config.FAVIDS;
+    var favNames = config.FAVNAMES;  
     //responsive hamburger toggle
     function hamToggle() {
       var x = document.getElementById("myTopnav");
@@ -81,7 +82,6 @@
         }});
     }
     IDtoURL();
-    
     //check undefined stop names
     function checkUndefined() {
         if (typeof document.getElementById('stopName').innerHTML === "undefined") {
@@ -93,7 +93,17 @@
     function pad(n) {
         return n<10 ? '0'+n : n;
     }
-    
+    //default message on startup
+    function defaultInfo(){
+        document.getElementById('timeTableBody').innerHTML="";
+        document.getElementById('stopName').innerHTML = "Please enter a bus route or stop ID. <p class='examples'>Examples: 32, X9, 1000425, etc.</p>";
+        if (favIDs.length > 0) {
+            document.getElementById('timeTableBody').innerHTML+="<h4><i style='color:#DF4343;' class='fa fa-heart' aria-hidden='true'></i>&nbsp;&nbsp;MY FAVORITES</h4>";
+            for (i = 0; i < favIDs.length; i++) {
+                document.getElementById('timeTableBody').innerHTML+="<p><a class=\"stop\"onclick=\"location.href=this.href+'"+favIDs[i]+"';location.reload();return false;\" href='#'" + favIDs[i] + "' >" + favNames[i];
+            }
+        }
+    }
     //Take Stop ID or Bus Route Input and show results
     if (document.getElementById('stopIDInput').value.length > 3) { //If Bus ID
         function loadInfo() {
@@ -119,8 +129,7 @@
 
                 //check for invalid stop ID
                 if (busstopInfo.Message == "Stop Id not specified, invalid, or does not exist.") {
-                    document.getElementById('timeTableBody').innerHTML="";
-                    document.getElementById('stopName').innerHTML = "Please enter a bus route or stop ID. <p class='examples'>Examples: 32, X9, 1000425, etc.</p>";
+                    defaultInfo();
                 } else {
                     //busstop name + refresh time - refresh button update with current time
                     let date = new Date();
@@ -213,8 +222,7 @@
                 
                 //invalid route
                 if (dataRt.Message == "Pattern/route name not specified, invalid, or does not exist in this schedule.") {
-                    document.getElementById('timeTableBody').innerHTML="";
-                    document.getElementById('stopName').innerHTML = "Please enter a bus route or stop ID. <p class='examples'>Examples: 32, X9, 1000425, etc.</p>";
+                    defaultInfo();
                 } else {
                     document.getElementById('stopName').innerHTML = dataRt.Name + "<p class='examples'>Scroll down and select a stop.</p>"; 
                     //direction 0
