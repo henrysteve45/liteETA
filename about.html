@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+        <link rel="stylesheet" href="style.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <title>Dashboard | LiteETA</title>
+        <link rel="icon" type="image/png" href="logo.png"> 
+        <style>
+.about-image {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.75)), url("aboutbg.png");
+  height: 256px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+}
+
+.about-text {
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+}
+</style>
+    </head>
+    <body>
+        <div id="wrapper">
+        <nav>
+            <a href="index.html"><i class="fa fa-bus" aria-hidden="true"></i>&nbsp; Find Buses</a>
+            <a href="https://www.wmata.com/schedules/maps/upload/0_WMA_MAG_DC_21x34_200525.pdf" target="_blank" rel="noopener noreferrer"><i class="fa fa-map" aria-hidden="true"></i>&nbsp;System Map</a>
+            <a class="active" href="about.html"><i class="fa fa-info-circle" aria-hidden="true"></i>&nbsp;About</a>
+            <a href="https://www.wmata.com/" target="_blank" rel="noopener noreferrer"><i class="fa fa-external-link" aria-hidden="true"></i>&nbsp;Official WMATA Site</a>
+        </nav>
+        <div class="about-image">
+          <div class="about-text">
+            <h1 style="font-size:50px">About</h1>
+          </div>
+        </div>
+        <div class="about" style="color: white; background-color: #2c2c33; padding: 16px;">
+            <h1>General WIP</h1>
+                <h3>What is this?</h3>
+                    <p>This is a Real-Time Bus ETA web application. It displays information about Washington, DC Metrobus routes and schedules in a clean, accessible format.</p>
+                <h3>Who made this?</h3>
+                <h3>Why make this? Isn't there already an official bus ETA site?</h3>
+            <h1>Credits</h1>
+                <p>Bus time information from the <a href="https://developer.wmata.com/">Washington Metropolitan Area Transit Authority (WMATA)</a>. I used their developer API to pull bus data including time, stop, and location information.</p>
+                <p>Map is powered by <a href="https://leafletjs.com/">Leaflet</a> and <a href="https://docs.mapbox.com/api/overview/">Mapbox</a>. Leaflet is an open-source JavaScript library for generating interactive maps. It provides methods for creating markers, pins, polygons, and other modules needed for online maps. Mapbox provides map imagery for the maps.</p>
+                <p>Navigation bar icons are from <a href="https://fontawesome.com/icons?d=gallery">Font Awesome</a>.</p>
+        </div>
+        </div>
+    </body>
+</html>

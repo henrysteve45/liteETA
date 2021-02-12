@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+        <link rel="stylesheet" href="style.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <title>Dashboard | LiteETA</title>
+        <link rel="icon" type="image/png" href="logo.png">
+        <script type="text/javascript" src="config.js"></script>
+    </head>
+    <body>
+        <div id="wrapper">
+        <nav class="topnav" id="myTopnav">
+            <a href="javascript:void(0);" class="hamburger" onclick="hamToggle()"><i class="fa fa-bars"></i></a>
+            <a class="active" href="index.html"><i class="fa fa-bus" aria-hidden="true"></i>&nbsp; Find Buses</a>
+            <a href="https://www.wmata.com/schedules/maps/upload/0_WMA_MAG_DC_21x34_200525.pdf" target="_blank" rel="noopener noreferrer"><i class="fa fa-map" aria-hidden="true"></i>&nbsp;System Map</a>
+            <a href="about.html"><i class="fa fa-info-circle" aria-hidden="true"></i>&nbsp;About</a>
+            <a href="https://www.wmata.com/" target="_blank" rel="noopener noreferrer"><i class="fa fa-external-link" aria-hidden="true"></i>&nbsp;Official WMATA Site</a>
+        </nav>
+        <table id="main">
+            <tbody>
+                <tr>
+                    <td class="sideArea">
+                        <div id="sidePanel">
+                            <div id="stopIDForm">
+                                <input type="text" id="stopIDInput" value="">
+                                <a id="refreshButton" href="#" onclick="location.href=this.href+document.getElementById('stopIDInput').value;location.reload();return false;"><img height="32px" src="search.png"></a>
+                            </div>
+                            <div id="titleArea">
+                                <div id="stopName">Loading...</div>
+                            </div>
+                            <table id = "timeTable">
+                                <tbody id ="timeTableBody"></tbody>
+                            </table>
+                        </div>
+                    </td>
+                    <td class="mapArea">
+                        <div id="map"></div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+    </body>
+</html>
+<script type="text/javascript">
+    //load keys from config file
+    var wmataKey = config.WMATA_KEY;
+    var mapboxKey = config.MAPBOX_KEY;
+    console.log(wmataKey)
+    //responsive hamburger toggle
+    function hamToggle() {
+      var x = document.getElementById("myTopnav");
+      if (x.className === "topnav") {
+        x.className += " responsive";
+      } else {
+        x.className = "topnav";
+      }
+    }
+    //url must have #
+    function IDtoURL() {
+        a = document.URL.substring(document.URL.length - 8)
+        if (a.charAt(0) == "#") {
+            document.getElementById('stopIDInput').value = a.substring(a.length - 7);
+        } else {
+            document.getElementById('stopIDInput').value = "";
+        }
+        document.getElementById('stopIDInput').addEventListener('keyup', function(event) {if (event.code === 'Enter') {
+            location.href="#"+document.getElementById('stopIDInput').value;
+            location.reload();
+            return false;
+        }});
+    }
+    IDtoURL();
+    
+    //check undefined stop names
+    function checkUndefined() {
+        if (typeof document.getElementById('stopName').innerHTML === "undefined") {
+            document.getElementById('stopName').innerHTML = "This bus stop does not exist.";
+        }
+    }
+    
+    //add leading 0 to minutes and seconds for update time
+    function pad(n) {
+        return n<10 ? '0'+n : n;
+    }
+    
+    //Take Stop ID or Bus Route Input and show results
+    if (document.getElementById('stopIDInput').value.length > 3) { //If Bus ID
+        function loadInfo() {
+            //get bus stop ID number from address bar
+            const stopURL = document.URL.substring(document.URL.indexOf('#')+1);
+            var busstopID = stopURL;
+            //url to fetch wmata bus prediction api
+            const api_url = 'https://api.wmata.com/NextBusService.svc/json/jPredictions?api_key='+wmataKey+'&StopID='+busstopID;
+            //url for wmata bus stop location (lat,lon) info
+            const api_url2 = 'https://api.wmata.com/Bus.svc/json/jStopSchedule?api_key='+wmataKey+'&StopID='+busstopID;
+            //get stop information from wmata
+            async function getStop() {
+                //Bus prediction API call
+                const response = await fetch(api_url);
+                const data = await response.json();
+                var busstopInfo = data; //put JSON into var
+                console.log(busstopInfo);
+                //Leaflet API call
+                const response2 = await fetch(api_url2);
+                const data2 = await response2.json();
+                var mapInfo = data2; //put JSON into var
+                console.log(mapInfo);
+
+                //check for invalid stop ID
+                if (busstopInfo.Message == "Stop Id not specified, invalid, or does not exist.") {
+                    document.getElementById('timeTableBody').innerHTML="";
+                    document.getElementById('stopName').innerHTML = "Please enter a bus route or stop ID. <p class='examples'>Examples: 32, X9, 1000425, etc.</p>";
+                } else {
+                    //busstop name + refresh time - refresh button update with current time
+                    let date = new Date();
+                    hr = date.getHours();
+                    if (hr > 12) {
+                        hr -= 12;   
+                    }
+                    document.getElementById('stopName').innerHTML = busstopInfo.StopName + "<p id=\"refreshTime\"> Last Updated: " + hr + ":" + pad(date.getMinutes()) + ":" + pad(date.getSeconds()) + "</p>";
+                    //clear existing list
+                    document.getElementById('timeTableBody').innerHTML="";
+                    //for each bus in the predictions, add a row of information (route, destination, time) to table
+                    if (busstopInfo.Predictions.length > 0) {
+                        for (i = 0; i < busstopInfo.Predictions.length; i++) {
+                            if (busstopInfo.Predictions[i].Minutes == 0) {
+                                document.getElementById('timeTableBody').innerHTML+="<tr id=\"datatr\"><td>" + busstopInfo.Predictions[i].RouteID + "<p>" + busstopInfo.Predictions[i].DirectionText + "</p></td><td id=\"busTime\">ARR</td></tr>";
+                            } else {
+                                document.getElementById('timeTableBody').innerHTML+="<tr id=\"datatr\"><td>" + busstopInfo.Predictions[i].RouteID + "<p>" + busstopInfo.Predictions[i].DirectionText + "</p></td><td id=\"busTime\">" + busstopInfo.Predictions[i].Minutes + "<p>min</p></td></tr>";
+                            }
+                        }
+                    } else {
+                        document.getElementById('timeTableBody').innerHTML+="<tr id=\"datatr\"><td>No data available. Please check back later.</td></tr>";
+                    }
+                }
+
+                //bus stop icon
+                var flag = L.icon({
+                    iconUrl: 'logo.png',
+                    iconSize:     [32, 32], // size of the icon
+                    iconAnchor:   [24, 32], // point of the icon which will correspond to marker's location
+                    popupAnchor:  [-8, -48] // point from which the popup should open relative to the iconAnchor
+                });
+                //show bus stop location on map
+                var mymap = L.map('map').setView([mapInfo.Stop.Lat, mapInfo.Stop.Lon], 18);
+                L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token='+mapboxKey, {
+                    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                    maxZoom: 18,
+                    id: 'mapbox/streets-v11',
+                    tileSize: 512,
+                    zoomOffset: -1,
+                    accessToken: mapboxKey
+                }).addTo(mymap);
+                //show pin on map
+                var marker = L.marker([mapInfo.Stop.Lat, mapInfo.Stop.Lon], {icon: flag}).addTo(mymap);
+                marker.bindPopup(busstopInfo.StopName).openPopup();
+            }
+            getStop();
+            checkUndefined();
+        }
+        loadInfo();
+    } else { //If Route ID
+        
+        function loadRouteInfo() {
+            //get route id text after # in URL
+            const routeURL = document.URL.substring(document.URL.indexOf('#')+1);
+            var routeID = routeURL;
+            console.log(routeID);
+            const api_url_Route = 'https://api.wmata.com/Bus.svc/json/jRouteDetails?api_key='+wmataKey+'&RouteID='+routeID; //route ID
+            
+            //put map on screen
+            var mymap = L.map('map').setView([38.90231871483776, -77.0229391321578], 11);
+            
+            L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token='+mapboxKey, {
+                    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                    maxZoom: 18,
+                    id: 'mapbox/streets-v11',
+                    tileSize: 512,
+                    zoomOffset: -1,
+                    accessToken: mapboxKey
+                }).addTo(mymap);
+            //get route info JSON from wmata
+            async function getRouteInfo() {           
+                const responseRt = await fetch(api_url_Route);
+                const dataRt = await responseRt.json();
+                var routeInfo = dataRt;
+                console.log(dataRt);
+                
+                //bus stop icon image
+                var stopIcon0 = L.icon({
+                    iconUrl: 'stopIcon0.png',
+                    iconSize:     [8, 8], // size of the icon
+                    iconAnchor:   [4, 4], // point of the icon which will correspond to marker's location
+                    popupAnchor:  [0, -16] // point from which the popup should open relative to the iconAnchor
+                });
+                var stopIcon1 = L.icon({
+                    iconUrl: 'stopIcon1.png',
+                    iconSize:     [8, 8], // size of the icon
+                    iconAnchor:   [4, 4], // point of the icon which will correspond to marker's location
+                    popupAnchor:  [0, -16] // point from which the popup should open relative to the iconAnchor
+                });
+                
+                //invalid route
+                if (dataRt.Message == "Pattern/route name not specified, invalid, or does not exist in this schedule.") {
+                    document.getElementById('timeTableBody').innerHTML="";
+                    document.getElementById('stopName').innerHTML = "Please enter a bus route or stop ID. <p class='examples'>Examples: 32, X9, 1000425, etc.</p>";
+                } else {
+                    document.getElementById('stopName').innerHTML = dataRt.Name + "<p class='examples'>Scroll down and select a stop.</p>"; 
+                    //direction 0
+                    if (dataRt.Direction0 !== null) {
+                        document.getElementById('timeTableBody').innerHTML+="<h4><i style='color:#5788c1;' class='fa fa-circle' aria-hidden='true'></i>&nbsp;&nbsp;" + dataRt.Direction0.TripHeadsign + "</h4>";
+                        if (dataRt.Direction0.Stops.length != 0) {
+                            for (i = 0; i < dataRt.Direction0.Stops.length; i++) {
+                                document.getElementById('timeTableBody').innerHTML+="<p><a class=\"stop\"onclick=\"location.href=this.href+'"+dataRt.Direction0.Stops[i].StopID+"';location.reload();return false;\" href='#'" + dataRt.Direction0.Stops[i].StopID + "' >" + dataRt.Direction0.Stops[i].Name+'</a></p>';
+                                //show these stops on map
+                                var marker = L.marker([dataRt.Direction0.Stops[i].Lat, dataRt.Direction0.Stops[i].Lon], {icon: stopIcon0}).addTo(mymap);
+                                marker.bindPopup("<p><a class=\"stop\" onclick=\"location.href=this.href+'"+dataRt.Direction0.Stops[i].StopID+"';location.reload();return false;\" href='#'" + dataRt.Direction0.Stops[i].StopID + "' >" + dataRt.Direction0.Stops[i].Name+'</a></p>');
+                            }
+                        } else { //stop array empty
+                            document.getElementById('timeTableBody').innerHTML+="<p>No stop information available. Please try again later.</p>";
+                        }
+                    } else {
+                        document.getElementById('timeTableBody').innerHTML+="<h4>This is a looped route.</h4>";
+                    }
+                    
+                    //direction 1
+                    if (dataRt.Direction1 !== null) {
+                        document.getElementById('timeTableBody').innerHTML+="<h4><i style='color:#DF4343;' class='fa fa-circle' aria-hidden='true'></i>&nbsp;&nbsp;" + dataRt.Direction1.TripHeadsign + "</h4>";
+                        if (dataRt.Direction1.Stops.length != 0) {
+                            for (i = 0; i < dataRt.Direction1.Stops.length; i++) {
+                                document.getElementById('timeTableBody').innerHTML+="<p><a class=\"stop\" onclick=\"location.href=this.href+'"+dataRt.Direction1.Stops[i].StopID+"';location.reload();return false;\" href='#'" + dataRt.Direction1.Stops[i].StopID + "' >" + dataRt.Direction1.Stops[i].Name+'</a></p>';
+                                //show these stops on map
+                                var marker = L.marker([dataRt.Direction1.Stops[i].Lat, dataRt.Direction1.Stops[i].Lon], {icon: stopIcon1}).addTo(mymap);
+                                marker.bindPopup("<p><a class=\"stop\" onclick=\"location.href=this.href+'"+dataRt.Direction1.Stops[i].StopID+"';location.reload();return false;\" href='#'" + dataRt.Direction1.Stops[i].StopID + "' >" + dataRt.Direction1.Stops[i].Name+'</a></p>');
+                            }
+                        } else { //stop array empty
+                            document.getElementById('timeTableBody').innerHTML+="<p>No stop information available. Please try again later.</p>";
+                        }
+                    } else {
+                        document.getElementById('timeTableBody').innerHTML+="<h4>This is a looped route.</h4>";
+                    }
+                }
+            }
+            getRouteInfo();
+        }
+        loadRouteInfo();
+    }
+</script>
