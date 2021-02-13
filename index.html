@@ -57,7 +57,7 @@
     var wmataKey = config.WMATA_KEY;
     var mapboxKey = config.MAPBOX_KEY;
     var favIDs = config.FAVIDS;
-    var favNames = config.FAVNAMES;  
+    var favNames = config.FAVNAMES;
     //responsive hamburger toggle
     function hamToggle() {
       var x = document.getElementById("myTopnav");
@@ -84,7 +84,7 @@
     IDtoURL();
     //check undefined stop names
     function checkUndefined() {
-        if (typeof document.getElementById('stopName').innerHTML === "undefined") {
+        if (typeof(document.getElementById('stopName').innerHTML) === "undefined") {
             document.getElementById('stopName').innerHTML = "This bus stop does not exist.";
         }
     }
@@ -120,13 +120,10 @@
                 const response = await fetch(api_url);
                 const data = await response.json();
                 var busstopInfo = data; //put JSON into var
-                console.log(busstopInfo);
                 //Leaflet API call
                 const response2 = await fetch(api_url2);
                 const data2 = await response2.json();
                 var mapInfo = data2; //put JSON into var
-                console.log(mapInfo);
-
                 //check for invalid stop ID
                 if (busstopInfo.Message == "Stop Id not specified, invalid, or does not exist.") {
                     defaultInfo();
@@ -185,7 +182,6 @@
             //get route id text after # in URL
             const routeURL = document.URL.substring(document.URL.indexOf('#')+1);
             var routeID = routeURL;
-            console.log(routeID);
             const api_url_Route = 'https://api.wmata.com/Bus.svc/json/jRouteDetails?api_key='+wmataKey+'&RouteID='+routeID; //route ID
             
             //put map on screen
@@ -203,9 +199,7 @@
             async function getRouteInfo() {           
                 const responseRt = await fetch(api_url_Route);
                 const dataRt = await responseRt.json();
-                var routeInfo = dataRt;
-                console.log(dataRt);
-                
+                var routeInfo = dataRt;              
                 //bus stop icon image
                 var stopIcon0 = L.icon({
                     iconUrl: 'stopIcon0.png',
