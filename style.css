@@ -218,4 +218,7 @@ a.hamburger {
     display: block;
     text-align: left;
     }
+    #refreshButton {
+        width: 16vw;
+    }
 }
