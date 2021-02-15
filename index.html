@@ -183,6 +183,7 @@
             const routeURL = document.URL.substring(document.URL.indexOf('#')+1);
             var routeID = routeURL;
             const api_url_Route = 'https://api.wmata.com/Bus.svc/json/jRouteDetails?api_key='+wmataKey+'&RouteID='+routeID; //route ID
+            const api_url_BusPos = 'https://api.wmata.com/Bus.svc/json/jBusPositions?api_key='+wmataKey+'&RouteID='+routeID;
             
             //put map on screen
             var mymap = L.map('map').setView([38.90231871483776, -77.0229391321578], 11);
@@ -197,9 +198,17 @@
                 }).addTo(mymap);
             //get route info JSON from wmata
             async function getRouteInfo() {           
+                //route data
                 const responseRt = await fetch(api_url_Route);
                 const dataRt = await responseRt.json();
-                var routeInfo = dataRt;              
+                var routeInfo = dataRt;
+                
+                //bus positions
+                const responseBusPos = await fetch(api_url_BusPos);
+                const dataBusPos = await responseBusPos.json();
+                var busPosInfo = dataBusPos;
+                console.log(dataBusPos);
+                
                 //bus stop icon image
                 var stopIcon0 = L.icon({
                     iconUrl: 'stopIcon0.png',
@@ -213,12 +222,19 @@
                     iconAnchor:   [4, 4], // point of the icon which will correspond to marker's location
                     popupAnchor:  [0, -16] // point from which the popup should open relative to the iconAnchor
                 });
+                var busIcon = L.icon({
+                    iconUrl: 'busIcon.png',
+                    iconSize:     [24, 24], // size of the icon
+                    iconAnchor:   [12, 12], // point of the icon which will correspond to marker's location
+                    popupAnchor:  [0, -12] // point from which the popup should open relative to the iconAnchor
+                });
                 
                 //invalid route
                 if (dataRt.Message == "Pattern/route name not specified, invalid, or does not exist in this schedule.") {
                     defaultInfo();
                 } else {
-                    document.getElementById('stopName').innerHTML = dataRt.Name + "<p class='examples'>Scroll down and select a stop.</p>"; 
+                    //show route name
+                    document.getElementById('stopName').innerHTML = dataRt.Name + "<p class='examples'>Scroll down and select a stop.</p>";
                     //direction 0
                     if (dataRt.Direction0 !== null) {
                         document.getElementById('timeTableBody').innerHTML+="<h4><i style='color:#5788c1;' class='fa fa-circle' aria-hidden='true'></i>&nbsp;&nbsp;" + dataRt.Direction0.TripHeadsign + "</h4>";
@@ -235,7 +251,6 @@
                     } else {
                         document.getElementById('timeTableBody').innerHTML+="<h4>This is a looped route.</h4>";
                     }
-                    
                     //direction 1
                     if (dataRt.Direction1 !== null) {
                         document.getElementById('timeTableBody').innerHTML+="<h4><i style='color:#DF4343;' class='fa fa-circle' aria-hidden='true'></i>&nbsp;&nbsp;" + dataRt.Direction1.TripHeadsign + "</h4>";
@@ -251,6 +266,10 @@
                         }
                     } else {
                         document.getElementById('timeTableBody').innerHTML+="<h4>This is a looped route.</h4>";
+                    }
+                    //show current buses on map
+                    for (i = 0; i < dataBusPos.BusPositions.length; i++) {
+                        var marker = L.marker([dataBusPos.BusPositions[i].Lat,dataBusPos.BusPositions[i].Lon], {icon: busIcon}).addTo(mymap); 
                     }
                 }
             }
